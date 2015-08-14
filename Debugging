@@ -17,7 +17,7 @@ nvram get pptpd_client_srvsub
 
 一般PPTP设置正确，都会拿到VPN的IP地址了，此时如果还是无法访问google的话，检查路由表：
 route
-如果default对应的gateway不是你VPN的gateway，需要手动设置以下：
+如果default对应的gateway不是你VPN的gateway，需要手动设置：
 
 OLDGW=$(nvram get wan_gateway) // current gateway
 VPNSRV=$(nvram get pptpd_client_srvip) // VPN server ip
