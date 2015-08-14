@@ -1,0 +1,31 @@
+Debugging
+
+DD-WRT将用户配置存放在NVRAM里，所以首先需要通过以上命令确保你的PPTP设置已经存入NVRAM
+
+当设置好PPTP以后，可以尝试telnet进router，检查以下几项：
+ps|grep pptp
+如过只有一个 ps|grep pptp,说明PPTP没启动。
+进入 /etc/config/, 找到pptp_client.vpn, 执行pptp_client.vpn start/stop/debug 来调试
+
+DD-WRT中，/tmp/下会存放当前的PPTP 脚本，一般来说和/etc/config下的一致
+
+常用命令：
+nvram get wan_gateway
+nvram get pptpd_client_srvip
+nvram get pptpd_client_srvsub
+(还有username和password, pptp_client.vpn中找对应命令)
+
+一般PPTP设置正确，都会拿到VPN的IP地址了，此时如果还是无法访问google的话，检查路由表：
+route
+如果default对应的gateway不是你VPN的gateway，需要手动设置以下：
+
+OLDGW=$(nvram get wan_gateway) // current gateway
+VPNSRV=$(nvram get pptpd_client_srvip) // VPN server ip
+VPNSRVSUB=$(nvram get pptpd_client_srvsub) // VPN subnet
+PPTPDEV=$(route -n | grep ^${VPNSRVSUB%.[0-9]*} | awk '{print $NF}' | head -n 1) // PPTP device e.g. ppp0
+VPNGW=$(ifconfig $PPTPDEV | grep -Eo "P-t-P:([0-9.]+)" | cut -d: -f2) // VPN gateway
+route add -host $VPNSRV gw $OLDGW // add host server IP, gateway is old gateway
+route del default gw $OLDGW // delete old default gateway
+route add default gw $VPNGW // use VPN gateway as defult
+
+如果每次router启动PPTP的路由表都不对，可以考虑开机运行上面的脚本
