@@ -73,6 +73,8 @@ root@DD-WRT:/tmp# tail -f /tmp/autoddvpn.log
 
 
 Introduction to PPTP
+dd-wrt post for setting up PPTP client
+http://www.dd-wrt.com/wiki/index.php/Static_PPTP_VPN_Client
 
 這份文件說明如何設置 autoddvpn 環境
 Details
