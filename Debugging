@@ -29,3 +29,5 @@ route del default gw $OLDGW // delete old default gateway
 route add default gw $VPNGW // use VPN gateway as defult
 
 如果每次router启动PPTP的路由表都不对，可以考虑开机运行上面的脚本
+
+当确定PPTP已经连接并且路由表配置好了，可以直接ping www.google.com或者 wget google主页试试，如果可以ping通或者下载到html，说明VPN工作了！
