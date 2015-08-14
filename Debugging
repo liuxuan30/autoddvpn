@@ -31,3 +31,21 @@ route add default gw $VPNGW // use VPN gateway as defult
 如果每次router启动PPTP的路由表都不对，可以考虑开机运行上面的脚本
 
 当确定PPTP已经连接并且路由表配置好了，可以直接ping www.google.com或者 wget google主页试试，如果可以ping通或者下载到html，说明VPN工作了！
+
+DNS: http://www.dd-wrt.com/wiki/index.php/DNSMasq_as_DHCP_server
+DD-WRT内置了两种DHCP服务器，标准的uDHCPd和DNSMasq，根据官方wiki中的介绍，前者会比后者占用更多的内存，只用DNSMasq做DHCP服务器的话，可以节省300kb左右的内存，这足以用于建立一个更多的PPTP隧道链接！
+默认情况下，DD-WRT会启用DNSMasq作为DHCP服务端，这就导致了在设置页Setup->Basic Setup->Network Setup->DHCP部分的三条Static DNS设置后不起作用，因为这里的选项是对应标准uDHCPd服务端的，就算设置了分配给DHCP客户端的DNS服务器地址还是路由器的内网IP，也就是还会默认以ISP提供的DNS解析服务器为准（咱们这ISP的解析污染的都差不多了…）。
+这时就需要取消下面选项中的Use DNSMasq for DNS，让标准服务提供客户端DNS解析服务器地址，当然这样会消耗更多的内存，显然是下策。
+上策就是到Services->Services->DNSMasq->Additional DNSMasq Options中填入如下内容：dhcp-option=6, 208.67.222.222, 8.8.8.8，这样应用设置并让客户端重新连接刷新DHCP信息后，就可以看到已经在使用指定的DNS解析服务器地址了。
+
+注意，
+DNSMasq = Enabled
+Local DNS = Enabled
+可以打开。
+常用debug命令：
+cat /tmp/dnsmasq.conf
+The options should match the command-line format specified in the DNSMasq man page.
+You should also make sure that DNSMasq is running at all. To do so, while in telnet issue
+/bin/ps | grep [d]nsmasq
+The output should look like:
+  144 root       772 S    dnsmasq --conf-file=/tmp/dnsmasq.conf
