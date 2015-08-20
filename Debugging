@@ -49,3 +49,32 @@ You should also make sure that DNSMasq is running at all. To do so, while in tel
 /bin/ps | grep [d]nsmasq
 The output should look like:
   144 root       772 S    dnsmasq --conf-file=/tmp/dnsmasq.conf
+
+
+Some other useful debugging:
+http://www.giganews.com/support/vyprvpn/vpn-setup/dd-wrt/pptp.html
+
+Option 1:
+In the event of VyprVPN connection failure, use this script if you would like your router to continue to route traffic using your ISP's IP address:
+Please copy and paste the script below into 'Commands' box – do not type manually:
+#!/bin/sh
+sleep 120
+PPTPSERVER=$(/usr/sbin/nvram get pptpd_client_srvip)
+PPTPGWY=$(/usr/sbin/nvram get wan_gateway)
+/sbin/route add -host $PPTPSERVER gw $PPTPGWY dev vlan2
+/sbin/route del default
+/sbin/route add default gw $PPTPGWY metric 100
+/sbin/route add default dev ppp0
+iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+
+Option 2:
+In the event of VyprVPN connection failure, use this script if you would like to terminate all Internet traffic until a VyprVPN connection can be re-established:
+Please copy and paste the script below into 'Commands' box – do not type manually:
+#!/bin/sh
+sleep 120
+PPTPSERVER=$(/usr/sbin/nvram get pptpd_client_srvip)
+PPTPGWY=$(/usr/sbin/nvram get wan_gateway)
+/sbin/route add -host $PPTPSERVER gw $PPTPGWY dev vlan2
+/sbin/route del default
+/sbin/route add default dev ppp0
+iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
